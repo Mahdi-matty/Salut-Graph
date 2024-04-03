@@ -45,12 +45,12 @@ Like.belongsTo(User, {
 User.belongsToMany(User, {
     through: Follow,
     as: "Followers",
-    foreignKey: "followed_user_id"
+    foreignKey: "followedUserId"
 })
 User.belongsToMany(User, {
     through: Follow,
     as: "Following",
-    foreignKey: "following_user_id"
+    foreignKey: "followingUserId"
 })
 
 
