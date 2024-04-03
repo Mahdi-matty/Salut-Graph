@@ -6,7 +6,7 @@ class Follow extends Model {}
 
 Follow.init(
   {
-    following_user_id: {
+    followingUserId: {
       type: DataTypes.INTEGER,
       references: {
         model: User,
@@ -14,7 +14,7 @@ Follow.init(
       },
 
     },
-    followed_user_id: {
+    followedUserId: {
       type: DataTypes.INTEGER,
       references: {
         model: User,

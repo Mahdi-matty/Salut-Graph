@@ -36,8 +36,8 @@ type Story {
 
 type Follow {
     id: ID
-    following_user_id: ID
-    followed_user_id: ID
+    followingUserId: ID
+    followedUserId: ID
 }
 type Auth {
     token: ID
@@ -57,7 +57,24 @@ type Query {
     userFollowing(userId: ID!): [User]
 }
 type Mutation {
-    addUser( userame: String!, email: String!, password: String!): Auth 
+    addUser( username: String!, email: String!, password: String!): Auth 
     updateUser(username: String, email: String, password: String): User
     login(username: String!, password: String!): Auth
-}`
+    addPost(id: ID!, title: String!, content: String!, imageSource: String!, userId: ID!): Post
+    deletePost(id: ID!): Post
+    editPost(id: ID!, title: String!, content: String!, imageSource: String!, userId: ID!): Post
+    editPostTitle(id: ID!, title: String!): Post
+    editPostContent(id: ID!, content: String!): Post
+    editPostImage(id: ID!, imageSource: String!): Post
+    addComment(id: ID!, text: String!, userId: ID!, postId: ID!): Comment
+    removeComment(id: ID!,): Comment
+    addStory(id: ID!, imageSource: String!, userId: ID!): Story
+    addFollow(id: ID!, followingUserId: ID!, followedUserId: ID!): Follow
+    removeFollow(id: ID!): Follow
+    addLike(status: Boolean!, userId: ID!, postId: ID!): Like
+    removeLike(id: ID!): Like
+}
+`;
+
+
+module.exports = typeDefs
