@@ -13,6 +13,8 @@ type Post {
     title: String
     content: String
     imageSource: String
+    comments: [Comment]
+    likes: [Like]
     userId: ID
 }
 
