@@ -23,6 +23,10 @@ const resolvers = {
         post: async (_, { id }) => {
             try {
                 const post = await Post.findByPk(id)
+                const comments = await Comment.findAll({where: {postId: id}})
+                const likes = await Like.findAll({where: {postId: id}})
+                post.dataValues.comments = comments;
+                post.dataValues.likes = likes;
                 return post
             } catch (error) {
                 console.log(error)
