@@ -1,6 +1,5 @@
 const { AuthenticationError } = require('apollo-server-express');
 const { User, Post, Comment, Follow, Story, Like } = require('../models')
-const TokenAuth = require('../middleware/withTokenAuth');
 const withTokenAuth = require('../middleware/withTokenAuth');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -87,12 +86,12 @@ const resolvers = {
         login: async (_, { username, password }) => {
             const user = await User.findOne({ username })
             if (!user) {
-                throw new AuthenticationError('incorrect credential')
+                throw new Error('incorrect credential')
             }
             const correctPass = await bcrypt.compare(password, user.password)
 
             if (!correctPass) {
-                throw new AuthenticationError("invalid credintial")
+                throw new Error("invalid credintial")
             }
             const token = jwt.sign(
                 { username: user.username, email: user.email, id: user.id },
