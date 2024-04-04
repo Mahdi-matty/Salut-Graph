@@ -58,21 +58,20 @@ type Query {
 }
 type Mutation {
     addUser( username: String!, email: String!, password: String!): Auth 
-    updateUser(username: String, email: String, password: String): User
     login(username: String!, password: String!): Auth
-    addPost(id: ID!, title: String!, content: String!, imageSource: String!, userId: ID!): Post
-    deletePost(id: ID!): Post
+    addPost( title: String!, content: String!, imageSource: String!, userId: ID!): Post
+    deletePost(id: ID!, userId: ID!): Post
     editPost(id: ID!, title: String!, content: String!, imageSource: String!, userId: ID!): Post
-    editPostTitle(id: ID!, title: String!): Post
-    editPostContent(id: ID!, content: String!): Post
-    editPostImage(id: ID!, imageSource: String!): Post
-    addComment(id: ID!, text: String!, userId: ID!, postId: ID!): Comment
-    removeComment(id: ID!,): Comment
-    addStory(id: ID!, imageSource: String!, userId: ID!): Story
-    addFollow(id: ID!, followingUserId: ID!, followedUserId: ID!): Follow
-    removeFollow(id: ID!): Follow
+    editPostTitle(id: ID!, title: String!, userId: ID!): Post
+    editPostContent(id: ID!, content: String!, userId: ID!): Post
+    editPostImage(id: ID!, imageSource: String!, userId: ID!): Post
+    addComment(text: String!, userId: ID!, postId: ID!): Comment
+    removeComment(id: ID!, userId: ID!): Comment
+    addStory(imageSource: String!, userId: ID!): Story
+    addFollow(followingUserId: ID!, followedUserId: ID!): Follow
+    removeFollow(id: ID!, followingUserId: ID!): Follow
     addLike(status: Boolean!, userId: ID!, postId: ID!): Like
-    removeLike(id: ID!): Like
+    removeLike(id: ID!, userId: ID!): Like
 }
 `;
 
