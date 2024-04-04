@@ -1,8 +1,10 @@
 const express = require('express');
 const { ApolloServer } = require('@apollo/server');
 const { typeDefs, resolvers } = require('./schemas');
+const { expressMiddleware } = require('@apollo/server/express4');
 const sequelize = require('./config/connection');
 const authMiddleware = require('./middleware/withTokenAuth')
+const path = require('path');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -26,7 +28,7 @@ const startApolloServer = async () => {
           res.sendFile(path.join(__dirname, '../client/dist/index.html'));
         });
       }
-      sequelize.once('open', () => {
+      sequelize.sync({force: false }).then(function() {
         app.listen(PORT, () => {
           console.log(`API server running on port ${PORT}!`);
           console.log(`Use GraphQL at http://localhost:${PORT}/graphql`);
