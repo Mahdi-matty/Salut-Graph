@@ -17,6 +17,23 @@ const resolvers = {
                 console.log(error)
             }
         },
+        searchUsers: async (_, { query }) => {
+            try {
+                // Implement your search logic here
+                const users = await User.findAll({
+                    where: {
+                        [Op.or]: [
+                            { username: { [Op.like]: `%${query}%` } },
+                            { email: { [Op.like]: `%${query}%` } }
+                        ]
+                    }
+                });
+                return users;
+            } catch (error) {
+                console.error("Error searching users:", error);
+                throw new Error('Failed to search users');
+            }
+        },
         posts: async () => {
             return await Post.findAll()
         },
@@ -66,17 +83,27 @@ const resolvers = {
         },
         userFollowers: async (_, { userId }) => {
             try {
-                const follow = await Follow.findAll({ where: { userId } })
-                return follow
-            } catch (error) {
+                const followsIds = await Follow.findAll({ where: { followedUserId: userId } })
+                const usersPromises  =  followsIds.map(async (follow)=> {
+                    const user = await User.findByPk(follow.followingUserId)
+                    return user
+                } );
+                const users = await Promise.all(usersPromises)
+                return users
+                 } catch (error) {
                 console.log(error)
             }
         },
         userFollowing: async (_, { userId }) => {
             try {
-                const follow = await Follow.findAll({ where: { userId } })
-                return follow
-            } catch (error) {
+                const followsIds = await Follow.findAll({ where: { followingUserId: userId } })
+                const usersPromises  =  followsIds.map(async (follow)=> {
+                    const user = await User.findByPk(follow.followedUserId)
+                    return user
+                } );
+                const users = await Promise.all(usersPromises)
+                return users
+                 } catch (error) {
                 console.log(error)
             }
         },
