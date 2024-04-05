@@ -55,8 +55,9 @@ type Query {
     likes(postId: ID!): [Like]
     userStory(userID : ID!): Story
     userPosts(userId: ID!): [Post]
-    userFollowers(userId: ID!): [User]
-    userFollowing(userId: ID!): [User]
+    userFollowers(followedUserId: ID!): [User]
+    userFollowing(followingUserId: ID!): [User]
+    searchUsers(query: String!): [User
 }
 type Mutation {
     addUser( username: String!, email: String!, password: String!): Auth 
