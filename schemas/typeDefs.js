@@ -57,7 +57,7 @@ type Query {
     userPosts(userId: ID!): [Post]
     userFollowers(followedUserId: ID!): [User]
     userFollowing(followingUserId: ID!): [User]
-    searchUsers(query: String!): [User
+    searchUsers(query: String!): [User]
 }
 type Mutation {
     addUser( username: String!, email: String!, password: String!): Auth 

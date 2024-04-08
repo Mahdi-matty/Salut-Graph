@@ -2,7 +2,7 @@ const express = require('express');
 const { ApolloServer } = require('apollo-server-express');
 const { typeDefs, resolvers } = require('./schemas');
 const sequelize = require('./config/connection');
-const withTokenAuth = require('./middleware/withTokenAuth')
+const { authMiddleware } = require('./middleware/withTokenAuth')
 const path = require('path');
 
 const PORT = process.env.PORT || 3001;
@@ -10,7 +10,7 @@ const app = express();
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: withTokenAuth
+  context: authMiddleware
 })
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -28,5 +28,4 @@ const startApolloServer = async (typeDefs, resolvers) => {
       });
     }
 
-    startApolloServer()
-    
+    startApolloServer()  

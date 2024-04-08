@@ -1,6 +1,6 @@
 const { AuthenticationError } = require('apollo-server-express');
 const { User, Post, Comment, Follow, Story, Like } = require('../models')
-const withTokenAuth = require('../middleware/withTokenAuth');
+const { signToken } = require('../middleware/withTokenAuth')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -109,10 +109,16 @@ const resolvers = {
         },
     },
     Mutation: {
-        addUser: async (parent, { username, email, password }) => {
-            const user = await User.create({ username, email, password })
-            const token = withTokenAuth(user)
-            return { token, user }
+        addUser: async (_, {username, email, password}) => {
+            try {
+                const user = await User.create({username, email, password});
+                const token = signToken(user);
+                return { token, user };
+              } catch (error) {
+                // Handle errors (e.g., database errors, token generation errors) here
+                console.error("Error creating user:", error);
+                throw new Error("Failed to create user");
+              }
         },
         login: async (_, { username, password }) => {
             const user = await User.findOne({ username })
