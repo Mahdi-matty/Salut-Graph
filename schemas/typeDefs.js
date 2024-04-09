@@ -18,6 +18,7 @@ type Post {
     userId: ID
 }
 
+
 type Comment {
     id: ID
     text: String
@@ -58,6 +59,7 @@ type Query {
     userFollowers(followedUserId: ID!): [User]
     userFollowing(followingUserId: ID!): [User]
     searchUsers(query: String!): [User]
+    loggedin(tokne: ID!): User
 }
 type Mutation {
     addUser( username: String!, email: String!, password: String!): Auth 
