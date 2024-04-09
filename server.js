@@ -4,13 +4,14 @@ const { typeDefs, resolvers } = require('./schemas');
 const sequelize = require('./config/connection');
 const { authMiddleware } = require('./middleware/withTokenAuth')
 const path = require('path');
+const {User, Post, Comment, Like, Follow, Story } = require('./models')
 
 const PORT = process.env.PORT || 3001;
 const app = express();
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: authMiddleware
+  context: {authMiddleware, User, Post, Follow, Like, Story, Comment}
 })
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
