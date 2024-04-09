@@ -40,8 +40,8 @@ const resolvers = {
         post: async (_, { id }) => {
             try {
                 const post = await Post.findByPk(id)
-                const comments = await Comment.findAll({where: {postId: id}})
-                const likes = await Like.findAll({where: {postId: id}})
+                const comments = await Comment.findAll({ where: { postId: id } })
+                const likes = await Like.findAll({ where: { postId: id } })
                 post.dataValues.comments = comments;
                 post.dataValues.likes = likes;
                 return post
@@ -84,41 +84,65 @@ const resolvers = {
         userFollowers: async (_, { userId }) => {
             try {
                 const followsIds = await Follow.findAll({ where: { followedUserId: userId } })
-                const usersPromises  =  followsIds.map(async (follow)=> {
+                const usersPromises = followsIds.map(async (follow) => {
                     const user = await User.findByPk(follow.followingUserId)
                     return user
-                } );
+                });
                 const users = await Promise.all(usersPromises)
                 return users
-                 } catch (error) {
+            } catch (error) {
                 console.log(error)
             }
         },
         userFollowing: async (_, { userId }) => {
             try {
                 const followsIds = await Follow.findAll({ where: { followingUserId: userId } })
-                const usersPromises  =  followsIds.map(async (follow)=> {
+                const usersPromises = followsIds.map(async (follow) => {
                     const user = await User.findByPk(follow.followedUserId)
                     return user
-                } );
+                });
                 const users = await Promise.all(usersPromises)
                 return users
-                 } catch (error) {
+            } catch (error) {
                 console.log(error)
             }
         },
+        loggedin: async (_, { token }) => {
+            if (!token) {
+              throw new Error('Token not provided');
+            }
+            
+            try {
+              const decoded = jwt.verify(token, process.env.JWT_SECRET);
+              const userName = decoded.username;
+              
+              const user = await User.findOne({
+                where: {
+                  username: userName
+                }
+              });
+      
+              if (user) {
+                return user;
+              } else {
+                throw new Error('User not found');
+              }
+            } catch (error) {
+              throw new Error('Invalid token');
+            }
+          }
     },
     Mutation: {
-        addUser: async (_, {username, email, password}) => {
+        addUser: async (_, { username, email, password }) => {
             try {
-                const user = await User.create({username, email, password});
+                const user = await User.create({ username, email, password });
                 const token = signToken(user);
                 return { token, user };
-              } catch (error) {
+            } catch (error) {
                 // Handle errors (e.g., database errors, token generation errors) here
                 console.error("Error creating user:", error);
                 throw new Error("Failed to create user");
-              }
+            }
         },
         login: async (_, { username, password }) => {
             const user = await User.findOne({ username })
@@ -137,204 +161,204 @@ const resolvers = {
             );
             return { token, user };
         },
-        addPost: async(_, {title, content, imageSource, userId})=>{
-            try{
+        addPost: async (_, { title, content, imageSource, userId }) => {
+            try {
                 const user = await User.findByPk(userId)
-                if(!user){
+                if (!user) {
                     throw new Error('user not found')
                 }
-                const post = await Post.create({title, content, imageSource, userId})
+                const post = await Post.create({ title, content, imageSource, userId })
                 return post
-            }catch(error){
+            } catch (error) {
                 console.error("error", error)
                 throw new Error('failed')
             }
         },
-        deletePost: async (_, {id, userId})=>{
-            try{
+        deletePost: async (_, { id, userId }) => {
+            try {
                 const user = await User.findByPk(userId)
                 const findPos = await Post.findByPk(id)
-                if(findPos.userId !== user.id){
+                if (findPos.userId !== user.id) {
                     throw new Error('You are not authorized to edit this post')
                 }
-                const post = await Post.destroy ({where: {id}})
+                const post = await Post.destroy({ where: { id } })
                 if (post === 0) {
                     throw new Error('Post not found or you are not authorized to delete it');
-                  }
-          
-                  return { success: true, message: 'Post deleted successfully' };
-            }catch(error){
+                }
+
+                return { success: true, message: 'Post deleted successfully' };
+            } catch (error) {
                 console.error("error", error)
                 throw new Error('failed')
             }
         },
-        editPost: async (_, {id, title, content, imageSource, userId})=>{
-            try{
+        editPost: async (_, { id, title, content, imageSource, userId }) => {
+            try {
                 const user = await User.findByPk(userId)
                 const findPos = await Post.findByPk(id)
-                if(findPos.userId !== user.id){
+                if (findPos.userId !== user.id) {
                     throw new Error('You are not authorized to edit this post')
                 }
-                const post = await Post.update({title, content, imageSource},{where: {id}})
+                const post = await Post.update({ title, content, imageSource }, { where: { id } })
                 return post
-            }catch(error){
+            } catch (error) {
                 console.error("error", error)
                 throw new Error('failed')
             }
         },
-        editPostTitle: async (_, {id, title, userId})=>{
-            try{
+        editPostTitle: async (_, { id, title, userId }) => {
+            try {
                 const user = await User.findByPk(userId)
                 const findPos = await Post.findByPk(id)
-                if(findPos.userId !== user.id){
+                if (findPos.userId !== user.id) {
                     throw new Error('You are not authorized to edit this post')
                 }
-                const post = await Post.update({title},{where: {id}})
+                const post = await Post.update({ title }, { where: { id } })
                 return post
-            }catch(error){
+            } catch (error) {
                 console.error("error", error)
                 throw new Error('failed')
             }
         },
-        editPostContent:  async (_, {id, content, userId})=>{
-            try{
+        editPostContent: async (_, { id, content, userId }) => {
+            try {
                 const user = await User.findByPk(userId)
                 const findPos = await Post.findByPk(id)
-                if(findPos.userId !== user.id){
+                if (findPos.userId !== user.id) {
                     throw new Error('You are not authorized to edit this post')
                 }
-                const post = await Post.update({content},{where: {id}})
+                const post = await Post.update({ content }, { where: { id } })
                 return post
-            }catch(error){
+            } catch (error) {
                 console.error("error", error)
                 throw new Error('failed')
             }
         },
-        editPostImage: async (_, {id, imageSource, userId})=>{
-            try{
+        editPostImage: async (_, { id, imageSource, userId }) => {
+            try {
                 const user = await User.findByPk(userId)
                 const findPos = await Post.findByPk(id)
-                if(findPos.userId !== user.id){
+                if (findPos.userId !== user.id) {
                     throw new Error('You are not authorized to edit this post')
                 }
-                const post = await Post.update({imageSource},{where: {id}})
+                const post = await Post.update({ imageSource }, { where: { id } })
                 return post
-            }catch(error){
+            } catch (error) {
                 console.error("error", error)
                 throw new Error('failed')
             }
         },
-        addComment:  async(_, {text, userId, postId})=>{
-            try{
+        addComment: async (_, { text, userId, postId }) => {
+            try {
                 const user = await User.findByPk(userId)
-                if(!user){
+                if (!user) {
                     throw new Error('user not found')
                 }
-                const comments = await Comment.create({text, userId, postId})
+                const comments = await Comment.create({ text, userId, postId })
                 return comments
-            }catch(error){
+            } catch (error) {
                 console.error("error", error)
                 throw new Error('failed')
             }
         },
-        removeComment : async (_, {id, userId})=>{
-            try{
+        removeComment: async (_, { id, userId }) => {
+            try {
                 const user = await User.findByPk(userId)
                 const findPCom = await Comment.findByPk(id)
-                if(findPCom.userId !== user.id){
+                if (findPCom.userId !== user.id) {
                     throw new Error('You are not authorized to edit this comment')
                 }
-                const comment = await Comment.destroy ({where: {id}})
+                const comment = await Comment.destroy({ where: { id } })
                 if (comment === 0) {
                     throw new Error('Post not found or you are not authorized to delete it');
-                  }
-          
-                  return { success: true, message: 'comment deleted successfully' };
-            }catch(error){
+                }
+
+                return { success: true, message: 'comment deleted successfully' };
+            } catch (error) {
                 console.error("error", error)
                 throw new Error('failed')
             }
         },
-        addStory:  async(_, {imageSource, userId})=>{
-            try{
+        addStory: async (_, { imageSource, userId }) => {
+            try {
                 const user = await User.findByPk(userId)
-                if(!user){
+                if (!user) {
                     throw new Error('user not found')
                 }
-                const story = await Story.create({imageSource, userId})
+                const story = await Story.create({ imageSource, userId })
                 return story
-            }catch(error){
+            } catch (error) {
                 console.error("error", error)
                 throw new Error('failed')
             }
         },
-        addFollow:  async(_, {followingUserId, followedUserId})=>{
-            try{
+        addFollow: async (_, { followingUserId, followedUserId }) => {
+            try {
                 const user = await User.findByPk(followingUserId)
-                if(!user){
+                if (!user) {
                     throw new Error('user not found')
                 }
-                const follow = await Follow.create({followingUserId, followedUserId})
+                const follow = await Follow.create({ followingUserId, followedUserId })
                 return follow
-            }catch(error){
+            } catch (error) {
                 console.error("error", error)
                 throw new Error('failed')
             }
         },
-        removeFollow : async (_, {id, followingUserId})=>{
-            try{
+        removeFollow: async (_, { id, followingUserId }) => {
+            try {
                 const user = await User.findByPk(followingUserId)
                 const findPCom = await Follow.findByPk(id)
-                if(findPCom.followingUserId !== user.id){
+                if (findPCom.followingUserId !== user.id) {
                     throw new Error('You are not authorized to edit this')
                 }
-                const follow = await Follow.destroy ({where: {id}})
+                const follow = await Follow.destroy({ where: { id } })
                 if (follow === 0) {
                     throw new Error('you are not authorized to delete it');
-                  }
-          
-                  return { success: true, message: 'deleted successfully' };
-            }catch(error){
+                }
+
+                return { success: true, message: 'deleted successfully' };
+            } catch (error) {
                 console.error("error", error)
                 throw new Error('failed')
             }
         },
-        addLike:  async(_, {status, userId, postId})=>{
-            try{
+        addLike: async (_, { status, userId, postId }) => {
+            try {
                 const user = await User.findByPk(userId)
-                if(!user){
+                if (!user) {
                     throw new Error('user not found')
                 }
                 const post = await Post.findByPk(postId)
-                if(!post){
+                if (!post) {
                     throw new Error('post not found')
                 }
-                const like = await Like.create({status, userId, postId})
+                const like = await Like.create({ status, userId, postId })
                 return like
-            }catch(error){
+            } catch (error) {
                 console.error("error", error)
                 throw new Error('failed')
             }
         },
-        removeLike : async (_, {id, userId})=>{
-            try{
+        removeLike: async (_, { id, userId }) => {
+            try {
                 const user = await User.findByPk(userId)
                 const findPCom = await Like.findByPk(id)
-                if(findPCom.userId !== user.id){
+                if (findPCom.userId !== user.id) {
                     throw new Error('You are not authorized to edit')
                 }
-                const like = await Like.destroy ({where: {id}})
+                const like = await Like.destroy({ where: { id } })
                 if (like === 0) {
                     throw new Error('not found or you are not authorized to delete it');
-                  }
-          
-                  return { success: true, message: 'deleted successfully' };
-            }catch(error){
+                }
+
+                return { success: true, message: 'deleted successfully' };
+            } catch (error) {
                 console.error("error", error)
                 throw new Error('failed')
             }
         },
-        
+
     }
 }
 
