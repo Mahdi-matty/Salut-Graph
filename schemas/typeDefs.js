@@ -58,25 +58,22 @@ type Query {
     userPosts(userId: ID!): [Post]
     userFollowers(followedUserId: ID!): [User]
     userFollowing(followingUserId: ID!): [User]
-    searchUsers(query: String!): [User]
+    searchUsers(username: String!): User
     loggedin(tokne: ID!): User
 }
 type Mutation {
     addUser( username: String!, email: String!, password: String!): Auth 
     login(username: String!, password: String!): Auth
-    addPost( title: String!, content: String!, imageSource: String!, userId: ID!): Post
+    addPost( title: String!, content: String!, imageSource: String, userId: ID!): Post
     deletePost(id: ID!, userId: ID!): Post
-    editPost(id: ID!, title: String!, content: String!, imageSource: String!, userId: ID!): Post
-    editPostTitle(id: ID!, title: String!, userId: ID!): Post
-    editPostContent(id: ID!, content: String!, userId: ID!): Post
-    editPostImage(id: ID!, imageSource: String!, userId: ID!): Post
+    editPost(id: ID!, title: String, content: String, imageSource: String, userId: ID!): Post
     addComment(text: String!, userId: ID!, postId: ID!): Comment
     removeComment(id: ID!, userId: ID!): Comment
     addStory(imageSource: String!, userId: ID!): Story
     addFollow(followingUserId: ID!, followedUserId: ID!): Follow
     removeFollow(id: ID!, followingUserId: ID!): Follow
     addLike(status: Boolean!, userId: ID!, postId: ID!): Like
-    removeLike(id: ID!, userId: ID!): Like
+    removeLike(status: Boolean!, id: ID!, userId: ID!): Like
 }
 `;
 

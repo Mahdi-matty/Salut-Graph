@@ -17,24 +17,24 @@ const resolvers = {
                 console.log(error)
             }
         },
-        searchUsers: async (_, { query }) => {
+        searchUsers: async (_, { username }) => {
             try {
-                const users = await User.findAll({
-                    where: {
-                        [Op.or]: [
-                            { username: { [Op.like]: `%${query}%` } },
-                            { email: { [Op.like]: `%${query}%` } }
-                        ]
-                    }
-                });
-                return users;
+                const user  = await User.findOne({where: {username: username}})
+                return user
             } catch (error) {
                 console.error("Error searching users:", error);
                 throw new Error('Failed to search users');
             }
         },
         posts: async () => {
-            return await Post.findAll()
+            const newPosts= await Post.findAll()
+            await Promise.all(newPosts.map(async (post) => {
+                const postComments = await Comment.findAll({where: {postId: post.id}})
+                const postLikes = await Like.findAll({where: {postId: post.id}})
+                post.dataValues.comments = postComments;
+                post.dataValues.likes = postLikes;
+          }))
+          return newPosts
         },
         post: async (_, { id }) => {
             try {
@@ -205,48 +205,6 @@ const resolvers = {
                 throw new Error('failed')
             }
         },
-        editPostTitle: async (_, { id, title, userId }) => {
-            try {
-                const user = await User.findByPk(userId)
-                const findPos = await Post.findByPk(id)
-                if (findPos.userId !== user.id) {
-                    throw new Error('You are not authorized to edit this post')
-                }
-                const post = await Post.update({ title }, { where: { id } })
-                return post
-            } catch (error) {
-                console.error("error", error)
-                throw new Error('failed')
-            }
-        },
-        editPostContent: async (_, { id, content, userId }) => {
-            try {
-                const user = await User.findByPk(userId)
-                const findPos = await Post.findByPk(id)
-                if (findPos.userId !== user.id) {
-                    throw new Error('You are not authorized to edit this post')
-                }
-                const post = await Post.update({ content }, { where: { id } })
-                return post
-            } catch (error) {
-                console.error("error", error)
-                throw new Error('failed')
-            }
-        },
-        editPostImage: async (_, { id, imageSource, userId }) => {
-            try {
-                const user = await User.findByPk(userId)
-                const findPos = await Post.findByPk(id)
-                if (findPos.userId !== user.id) {
-                    throw new Error('You are not authorized to edit this post')
-                }
-                const post = await Post.update({ imageSource }, { where: { id } })
-                return post
-            } catch (error) {
-                console.error("error", error)
-                throw new Error('failed')
-            }
-        },
         addComment: async (_, { text, userId, postId }) => {
             try {
                 const user = await User.findByPk(userId)
@@ -339,19 +297,19 @@ const resolvers = {
                 throw new Error('failed')
             }
         },
-        removeLike: async (_, { id, userId }) => {
+        removeLike: async (_, { id, userId, status }) => {
             try {
                 const user = await User.findByPk(userId)
                 const findPCom = await Like.findByPk(id)
                 if (findPCom.userId !== user.id) {
                     throw new Error('You are not authorized to edit')
                 }
-                const like = await Like.destroy({ where: { id } })
+                const like = await Like.update({status: status},{ where: { id } })
                 if (like === 0) {
-                    throw new Error('not found or you are not authorized to delete it');
+                    throw new Error('not found or you are not authorized to edit it');
                 }
 
-                return { success: true, message: 'deleted successfully' };
+                return like;
             } catch (error) {
                 console.error("error", error)
                 throw new Error('failed')
