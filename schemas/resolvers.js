@@ -19,7 +19,6 @@ const resolvers = {
         },
         searchUsers: async (_, { query }) => {
             try {
-                // Implement your search logic here
                 const users = await User.findAll({
                     where: {
                         [Op.or]: [
