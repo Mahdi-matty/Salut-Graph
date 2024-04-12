@@ -27,9 +27,13 @@ type Comment {
 }
 type Like {
     id: ID
-    status: Boolean
+    status: LikeStatus
     userId: ID
     postId: ID
+}
+enum LikeStatus {
+    notLiked
+    liked
 }
 type Story {
     id: ID
@@ -41,6 +45,11 @@ type Follow {
     id: ID
     followingUserId: ID
     followedUserId: ID
+}
+type Message {
+    text: String
+    reciverId: ID
+    senderId: ID
 }
 type Auth {
     token: ID
@@ -60,6 +69,7 @@ type Query {
     userFollowing(followingUserId: ID!): [User]
     searchUsers(username: String!): User
     loggedin(tokne: ID!): User
+    messages(senderId: ID!): [Message]
 }
 type Mutation {
     addUser( username: String!, email: String!, password: String!): Auth 
@@ -72,8 +82,9 @@ type Mutation {
     addStory(imageSource: String!, userId: ID!): Story
     addFollow(followingUserId: ID!, followedUserId: ID!): Follow
     removeFollow(id: ID!, followingUserId: ID!): Follow
-    addLike(status: Boolean!, userId: ID!, postId: ID!): Like
-    removeLike(status: Boolean!, id: ID!, userId: ID!): Like
+    addLike(status: LikeStatus!, userId: ID!, postId: ID!): Like
+    removeLike(id: ID!, userId: ID!): Like
+    sendMessage(text: String!, senderId: ID!, reciverId: ID!): Message
 }
 `;
 

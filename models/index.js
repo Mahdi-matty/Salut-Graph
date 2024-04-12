@@ -4,7 +4,7 @@ const Like = require('./Like')
 const Post = require('./Post')
 const Story = require('./Story')
 const User = require('./User')
-
+const Message = require('./Message')
 User.hasOne(Story, {
     foreignKey: "userId"
 })
@@ -53,6 +53,15 @@ User.belongsToMany(User, {
     foreignKey: "followingUserId"
 })
 
+Message.belongsTo(User, {
+    foreignKey: "senderId",
+    as: "sender"
+})
+Message.belongsTo(User, {
+    foreignKey: "reciverId",
+    as: "reciver"
+})
+
 
 
 module.exports = {
@@ -61,5 +70,6 @@ module.exports = {
     Like,
     User,
     Story,
-    Post
+    Post,
+    Message
 }
