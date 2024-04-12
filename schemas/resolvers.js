@@ -1,5 +1,5 @@
 const { AuthenticationError } = require('apollo-server-express');
-const { User, Post, Comment, Follow, Story, Like } = require('../models')
+const { User, Post, Comment, Follow, Story, Like, Message } = require('../models')
 const { signToken } = require('../middleware/withTokenAuth')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -19,7 +19,7 @@ const resolvers = {
         },
         searchUsers: async (_, { username }) => {
             try {
-                const user  = await User.findOne({where: {username: username}})
+                const user = await User.findOne({ where: { username: username } })
                 return user
             } catch (error) {
                 console.error("Error searching users:", error);
@@ -27,14 +27,17 @@ const resolvers = {
             }
         },
         posts: async () => {
-            const newPosts= await Post.findAll()
-            await Promise.all(newPosts.map(async (post) => {
-                const postComments = await Comment.findAll({where: {postId: post.id}})
-                const postLikes = await Like.findAll({where: {postId: post.id}})
-                post.dataValues.comments = postComments;
-                post.dataValues.likes = postLikes;
-          }))
-          return newPosts
+            const newPosts = await Post.findAll()
+            const postsWithData = await Promise.all(newPosts.map(async (post) => {
+                const postComments = await Comment.findAll({ where: { postId: post.id } })
+                const postLikes = await Like.findAll({ where: { postId: post.id } })
+                return {
+                    ...post.toJSON(),
+                    comments: postComments,
+                    likes: postLikes
+                };
+            }))
+            return postsWithData
         },
         post: async (_, { id }) => {
             try {
@@ -108,28 +111,36 @@ const resolvers = {
         },
         loggedin: async (_, { token }) => {
             if (!token) {
-              throw new Error('Token not provided');
+                throw new Error('Token not provided');
             }
-            
+
             try {
-              const decoded = jwt.verify(token, process.env.JWT_SECRET);
-              const userName = decoded.username;
-              
-              const user = await User.findOne({
-                where: {
-                  username: userName
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                const userName = decoded.username;
+
+                const user = await User.findOne({
+                    where: {
+                        username: userName
+                    }
+                });
+
+                if (user) {
+                    return user;
+                } else {
+                    throw new Error('User not found');
                 }
-              });
-      
-              if (user) {
-                return user;
-              } else {
-                throw new Error('User not found');
-              }
             } catch (error) {
-              throw new Error('Invalid token');
+                throw new Error('Invalid token');
             }
-          }
+        },
+        Messages: async (_, { senderId }) => {
+            try {
+                const messages = await Message.findAll({where: {senderId: senderId}})
+                return messages
+            }catch(error){
+                console.log(error)
+            }
+    },
     },
     Mutation: {
         addUser: async (_, { username, email, password }) => {
@@ -297,19 +308,19 @@ const resolvers = {
                 throw new Error('failed')
             }
         },
-        removeLike: async (_, { id, userId, status }) => {
+        removeLike: async (_, { id, userId }) => {
             try {
                 const user = await User.findByPk(userId)
                 const findPCom = await Like.findByPk(id)
                 if (findPCom.userId !== user.id) {
                     throw new Error('You are not authorized to edit')
                 }
-                const like = await Like.update({status: status},{ where: { id } })
+                const like = await Like.destroy({ where: { id } })
                 if (like === 0) {
                     throw new Error('not found or you are not authorized to edit it');
                 }
 
-                return like;
+                return { success: true, message: 'deleted successfully' };
             } catch (error) {
                 console.error("error", error)
                 throw new Error('failed')
