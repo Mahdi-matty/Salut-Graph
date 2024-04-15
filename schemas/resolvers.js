@@ -1,5 +1,5 @@
 const { AuthenticationError } = require('apollo-server-express');
-const { User, Post, Comment, Follow, Story, Like, Message } = require('../models')
+const { User, Post, Comment, Follow, Story, Like, Message, Notification } = require('../models')
 const { signToken } = require('../middleware/withTokenAuth')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -133,14 +133,23 @@ const resolvers = {
                 throw new Error('Invalid token');
             }
         },
-        Messages: async (_, { senderId }) => {
+        messages: async (_, { senderId }) => {
             try {
-                const messages = await Message.findAll({where: {senderId: senderId}})
+                const messages = await Message.findAll({ where: { senderId: senderId } })
                 return messages
-            }catch(error){
+            } catch (error) {
                 console.log(error)
             }
-    },
+        },
+        userNotif: async (_, { userId }) => {
+            try {
+                const notifications = await Notification.findAll({ where: { userId } })
+                return notifications
+            } catch (error) {
+                console.log(error)
+            }
+
+        }
     },
     Mutation: {
         addUser: async (_, { username, email, password }) => {
@@ -326,6 +335,22 @@ const resolvers = {
                 throw new Error('failed')
             }
         },
+        sendMessage: async(_, {text, senderId, reciverId})=>{
+            try{
+                const newMsg = await Message.create({text, senderId, reciverId})
+                return newMsg
+            }catch(error){
+                console.log(error)
+            }
+        },
+        addNotif: async (_, {userId, message, status})=>{
+            try{    
+                const newNote = await Notification.create({userId, message, status})
+                return newNote
+            }catch(error){
+                console.log(error)
+            }
+        }
 
     }
 }

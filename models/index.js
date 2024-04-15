@@ -5,6 +5,8 @@ const Post = require('./Post')
 const Story = require('./Story')
 const User = require('./User')
 const Message = require('./Message')
+const Notification = require('./Notification')
+
 User.hasOne(Story, {
     foreignKey: "userId"
 })
@@ -15,7 +17,14 @@ User.hasMany(Post, {
 Post.belongsTo(User, {
     foreignKey: "userId"
 })
-
+User.hasMany(Notification, {
+    as: 'notifications',
+    foreignKey: 'userId'
+  })
+  
+Notification.belongsTo(User, {
+    foreignKey: 'userId'
+  })
 User.hasMany(Comment, {
     foreignKey: "userId"
 })
@@ -71,5 +80,6 @@ module.exports = {
     User,
     Story,
     Post,
-    Message
+    Message,
+    Notification
 }

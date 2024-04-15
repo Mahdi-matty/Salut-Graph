@@ -31,9 +31,19 @@ type Like {
     userId: ID
     postId: ID
 }
+type Notification {
+    id: ID
+    message: String
+    status: NotificationStatus
+    userId: ID
+}
 enum LikeStatus {
     notLiked
     liked
+}
+enum NotificationStatus{
+    read
+    unread
 }
 type Story {
     id: ID
@@ -70,6 +80,7 @@ type Query {
     searchUsers(username: String!): User
     loggedin(tokne: ID!): User
     messages(senderId: ID!): [Message]
+    userNotif(userId: ID): [Notification]
 }
 type Mutation {
     addUser( username: String!, email: String!, password: String!): Auth 
@@ -85,6 +96,7 @@ type Mutation {
     addLike(status: LikeStatus!, userId: ID!, postId: ID!): Like
     removeLike(id: ID!, userId: ID!): Like
     sendMessage(text: String!, senderId: ID!, reciverId: ID!): Message
+    addNotif(message: String!, status: NotificationStatus!, userId: ID!): Notification
 }
 `;
 
