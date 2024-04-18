@@ -1,8 +1,8 @@
-const { AuthenticationError } = require('apollo-server-express');
 const { User, Post, Comment, Follow, Story, Like, Message, Notification } = require('../models')
 const { signToken } = require('../middleware/withTokenAuth')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize');
 
 const resolvers = {
     Query: {
@@ -133,12 +133,17 @@ const resolvers = {
                 throw new Error('Invalid token');
             }
         },
-        messages: async (_, { senderId }) => {
+        allMess: async (_, { userId }) => {
             try {
-                const messages = await Message.findAll({ where: { senderId: senderId } })
-                return messages
+                const newMessages = await Message.findAll({ where: {[Op.or]: [
+                    { senderId: userId },
+                    { reciverId: userId }
+                ] }
+            })
+                return newMessages
             } catch (error) {
                 console.log(error)
+                throw error
             }
         },
         userNotif: async (_, { userId }) => {

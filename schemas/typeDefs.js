@@ -79,7 +79,7 @@ type Query {
     userFollowing(followingUserId: ID!): [User]
     searchUsers(username: String!): User
     loggedin(tokne: ID!): User
-    messages(senderId: ID!): [Message]
+    allMess(userId: ID!): [Message]
     userNotif(userId: ID): [Notification]
 }
 type Mutation {
