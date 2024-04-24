@@ -65,6 +65,9 @@ type Auth {
     token: ID
     user: User
 }
+type Image{
+    url: String
+}
 
 type Query {
     users: [User]
@@ -97,6 +100,7 @@ type Mutation {
     removeLike(id: ID!, userId: ID!): Like
     sendMessage(text: String!, senderId: ID!, reciverId: ID!): Message
     addNotif(message: String!, status: NotificationStatus!, userId: ID!): Notification
+    uploadImage(image: Upload!): Image
 }
 `;
 
