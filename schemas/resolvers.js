@@ -3,6 +3,7 @@ const { signToken } = require('../middleware/withTokenAuth')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
+const { GraphQLUpload } = require('graphql-upload');
 
 const resolvers = {
     Query: {
@@ -135,11 +136,14 @@ const resolvers = {
         },
         allMess: async (_, { userId }) => {
             try {
-                const newMessages = await Message.findAll({ where: {[Op.or]: [
-                    { senderId: userId },
-                    { reciverId: userId }
-                ] }
-            })
+                const newMessages = await Message.findAll({
+                    where: {
+                        [Op.or]: [
+                            { senderId: userId },
+                            { reciverId: userId }
+                        ]
+                    }
+                })
                 return newMessages
             } catch (error) {
                 console.log(error)
@@ -340,24 +344,40 @@ const resolvers = {
                 throw new Error('failed')
             }
         },
-        sendMessage: async(_, {text, senderId, reciverId})=>{
-            try{
-                const newMsg = await Message.create({text, senderId, reciverId})
+        sendMessage: async (_, { text, senderId, reciverId }) => {
+            try {
+                const newMsg = await Message.create({ text, senderId, reciverId })
                 return newMsg
-            }catch(error){
+            } catch (error) {
                 console.log(error)
             }
         },
-        addNotif: async (_, {userId, message, status})=>{
-            try{    
-                const newNote = await Notification.create({userId, message, status})
+        addNotif: async (_, { userId, message, status }) => {
+            try {
+                const newNote = await Notification.create({ userId, message, status })
                 return newNote
-            }catch(error){
+            } catch (error) {
                 console.log(error)
             }
-        }
+        },
+        uploadImage: async (_, { image }) => {
+            const { createReadStream, filename, mimetype } = await image;
+            const params = {
+                Bucket: 'user-images-669af664-23f0-47fd-bd77-2745b6a066b7',
+                Key: `${uuidv4()}-${filename}`,
+                Body: createReadStream(),
+                ACL: 'private',
+                ContentType: mimetype,
+            };
 
-    }
+            return new Promise((resolve, reject) => {
+                s3.upload(params, (err, data) => {
+                    if (err) reject(err);
+                    resolve({ url: data.Location });
+                });
+            });
+        },
+    }, Upload: GraphQLUpload,
 }
 
 module.exports = resolvers
